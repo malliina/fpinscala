@@ -133,6 +133,58 @@ class FpisTests extends FunSuite {
     val l2 = List(1, 2, 3)
     assert(List.addElements(l1, l2) === List(3, 7, 35))
   }
+  test("add elements with generic method") {
+    val l1 = List(2, 5, 32)
+    val l2 = List(1, 2, 3)
+    assert(List.computeLists(l1, l2)(_ + _) === List(3, 7, 35))
+  }
+  test("has subsequence") {
+    val l = List(2, 3, 6, 666, 1, 2, 3)
+    assert(List.hasSubsequence(l, List(2, 3)))
+    assert(List.hasSubsequence(l, List(1, 2, 3)))
+    assert(List.hasSubsequence(l, List(3, 6, 666)))
+    assert(List.hasSubsequence(Nil, Nil))
+    assert(List.hasSubsequence(l, Nil))
+    assert(!List.hasSubsequence(l, List(1, 2, 3, 4)))
+    assert(!List.hasSubsequence(l, List(5)))
+    assert(!List.hasSubsequence(Nil, List(1, 2, 3)))
+  }
+  val t = Branch[Int](Branch[Int](Branch[Int](Leaf(1), Leaf(4)), Branch[Int](Leaf(2), Leaf(3))), Branch(Leaf(2), Leaf(5)))
+  val tDouble = Branch[Int](Branch[Int](Branch[Int](Leaf(2), Leaf(8)), Branch[Int](Leaf(4), Leaf(6))), Branch(Leaf(4), Leaf(10)))
 
+  /**
+   * b
+   * b         b
+   * b     b     2 5
+   * 1 4   2 3
+   */
+
+
+  test("Tree.size") {
+    assert(Tree.size(t) === 11)
+  }
+  test("Tree.maximum") {
+    assert(Tree.maximum(t) === 5)
+  }
+  test("Tree.depth") {
+    assert(Tree.depth(Leaf(555)) === 0)
+    assert(Tree.depth(t) === 3)
+  }
+  test("Tree.map") {
+    assert(Tree.map(t)(_ * 2) === tDouble)
+  }
+  test("Tree.sizeUsingFold") {
+    assert(Tree.sizeUsingFold(t) === 11)
+  }
+  test("Tree.maximumUsingFold") {
+    assert(Tree.maximumUsingFold(t) === 5)
+  }
+  test("Tree.depthUsingFold") {
+    assert(Tree.depthUsingFold(Leaf(555)) === 0)
+    assert(Tree.depthUsingFold(t) === 3)
+  }
+  test("Tree.mapUsingFold") {
+    assert(Tree.mapUsingFold(t)(_ * 2) === tDouble)
+  }
 
 }
