@@ -187,4 +187,18 @@ class FpisTests extends FunSuite {
     assert(Tree.mapUsingFold(t)(_ * 2) === tDouble)
   }
 
+  import Chapter4._
+
+  test("sequence[A](List[Option[A]])") {
+    val in1 = scala.List(Some(1), Some(2), None, Some(3))
+    assert(Chapter4.sequence(in1) === None)
+    val in2 = scala.List(Some("a"), Some("b"))
+    assert(Chapter4.sequence(in2) === Some(scala.List("a", "b")))
+  }
+  test("sequenceInTermsOfTraverse") {
+    val in1 = scala.List(Some(1), Some(2), None, Some(3))
+    assert(Chapter4.sequenceInTermsOfTraverse(in1) === None)
+    val in2 = scala.List(Some("a"), Some("b"))
+    assert(Chapter4.sequenceInTermsOfTraverse(in2) === Some(scala.List("a", "b")))
+  }
 }

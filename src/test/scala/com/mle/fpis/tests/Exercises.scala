@@ -32,17 +32,16 @@ object Exercises {
     else false
   }
 
-  // E. 2.3,4,5
   def partial1[A, B, C](a: A, f: (A, B) => C): B => C =
     b => f(a, b)
 
+  // E. 2.3,4,5
   def curry[A, B, C](f: (A, B) => C): A => (B => C) =
     a => b => f(a, b)
 
   def uncurry[A, B, C](f: A => B => C): (A, B) => C =
     (a, b) => f(a)(b)
 
-  // E2.6
   def compose[A, B, C](f: B => C, g: A => B): A => C =
     a => f(g(a))
 
@@ -141,9 +140,6 @@ object Exercises {
      * Cons(1, Cons(2, Cons(3, foldRight(Nil, Nil)((a, acc) => Cons(a, acc)))
      * Cons(1, Cons(2, Cons(3, Nil)))
      * List(1, 2, 3)
-     * @param l
-     * @tparam A
-     * @return
      */
     def identity[A](l: List[A]): List[A] =
       foldRight(l, Nil: List[A])((a, acc) => Cons(a, acc))
@@ -156,10 +152,6 @@ object Exercises {
      * foldLeft(Nil, Cons(3, Cons(2, Cons(1, Nil)))((acc, a) => Cons(a, acc))
      * Cons(3, Cons(2, Cons(1, Nil))
      * List(3, 2, 1)
-     *
-     * @param l
-     * @tparam A
-     * @return
      */
     def reverse[A](l: List[A]): List[A] =
       foldLeft(l, Nil: List[A])((acc, a) => Cons(a, acc))
@@ -305,5 +297,4 @@ object Exercises {
     def mapUsingFold[A, B](t: Tree[A])(f: A => B): Tree[B] =
       fold[A, Tree[B]](t, v => Leaf(f(v)))((l, r) => Branch(map(l)(f), map(r)(f)))
   }
-
 }
