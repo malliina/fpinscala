@@ -1,7 +1,7 @@
 package com.mle.fpis.tests
 
 import org.scalatest.FunSuite
-import Exercises._
+import Chapter2And3._
 
 /**
  *
@@ -37,7 +37,7 @@ class FpisTests extends FunSuite {
     assert(addThree(666) === 669)
   }
 
-  import Exercises.List
+  import Chapter2And3.List
 
   test("list") {
     assert(List.xValue === 3)
@@ -200,5 +200,12 @@ class FpisTests extends FunSuite {
     assert(Chapter4.sequenceInTermsOfTraverse(in1) === None)
     val in2 = scala.List(Some("a"), Some("b"))
     assert(Chapter4.sequenceInTermsOfTraverse(in2) === Some(scala.List("a", "b")))
+  }
+
+  import Chapter5._
+
+  test("streams") {
+    assert(Stream(1, 2, 3, 4, 5).take(2).toList === scala.List(1, 2))
+    assert(Empty.take(5) === Empty)
   }
 }

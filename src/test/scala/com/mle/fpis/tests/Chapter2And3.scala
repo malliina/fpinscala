@@ -4,7 +4,7 @@ package com.mle.fpis.tests
  *
  * @author Michael
  */
-object Exercises {
+object Chapter2And3 {
   // Exercise 2.1
 
   // 0 1 1 2 3 5 8 13 21
