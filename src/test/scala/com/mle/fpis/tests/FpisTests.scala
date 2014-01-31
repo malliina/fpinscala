@@ -208,4 +208,38 @@ class FpisTests extends FunSuite {
     assert(Stream(1, 2, 3, 4, 5).take(2).toList === scala.List(1, 2))
     assert(Empty.take(5) === Empty)
   }
+
+  test("Stream.takeWhile") {
+    assert(Empty.takeWhile(_ => true) === Empty)
+    assert(Stream(1, 2, 3, 4, 5).takeWhile(_ < 4).toList === Stream(1, 2, 3).toList)
+  }
+  test("Stream.exists") {
+    assert(Stream(1, 2, 3, 4).exists(_ == 3))
+    assert(!Stream(1, 2, 4).exists(_ == 3))
+  }
+  test("Stream.takeWhileUsingFoldRight") {
+    assert(Empty.takeWhileUsingFoldRight(_ => true) === Empty)
+    assert(Stream(1, 2, 3, 4, 5).takeWhileUsingFoldRight(_ < 4).toList === Stream(1, 2, 3).toList)
+  }
+  test("Stream.append") {
+    val result = Stream(1, 2).append(Stream(3, 4))
+    assert(result.toList === scala.List(1, 2, 3, 4))
+  }
+  test("Stream.flatMap") {
+    val s = Stream(1, 2, 3)
+    val result = s.flatMap(i => Stream(i * 2, i * 3))
+    assert(result.toList === scala.List(2, 3, 4, 6, 6, 9))
+  }
+  test("ones") {
+    assert(Stream.ones.map(_ + 1).exists(_ % 2 == 0))
+  }
+  test("Stream.fibs") {
+    assert(Stream.fibs.take(7).toList === scala.List(0, 1, 1, 2, 3, 5, 8))
+  }
+  test("Stream.onesUsingUnfold") {
+    assert(Stream.onesUsingUnfold.take(3).toList === scala.List(1, 1, 1))
+  }
+  test("Stream.fromUsingUnfold") {
+    assert(Stream.fromUsingUnfold(4).take(3).toList === scala.List(4, 5, 6))
+  }
 }

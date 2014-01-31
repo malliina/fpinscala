@@ -108,6 +108,15 @@ object Chapter2And3 {
         case Cons(x, Cons(y, xs)) => Cons(x, Cons(y, init(xs)))
       }
 
+    /**
+     * foldRight(List(1, 2, 3), 0)((a, b) => a + b)
+     * 1 + foldRight(List(2, 3), 0)((a, b) => a + b)
+     * 1 + (2 + foldRight(List(3), 0)((a, b) => a + b))
+     * 1 + (2 + (3 + foldRight(Nil, 0)((a, b) => a + b)))
+     * 1 + (2 + (3 + (0)))
+     * 6
+     */
+
     def foldRight[A, B](l: List[A], z: B)(f: (A, B) => B): B =
       l match {
         case Nil => z
@@ -117,6 +126,13 @@ object Chapter2And3 {
     def length[A](l: List[A]): Int =
       foldRight(l, 0)((a, acc) => acc + 1)
 
+    /**
+     * foldLeft(List(1, 2, 3), 0)((acc, a) => acc + a)
+     * foldLeft(List(2, 3), 1)((acc, a) => acc + a)
+     * foldLeft(List(3), 3)((acc, a) => acc + a)
+     * foldLeft(Nil, 6)((acc, a) => acc + a)
+     * 6
+     */
     def foldLeft[A, B](l: List[A], z: B)(f: (B, A) => B): B =
       l match {
         case Nil => z
@@ -133,9 +149,9 @@ object Chapter2And3 {
       foldLeft(l, 0)((acc, a) => acc + 1)
 
     /**
-     * identity(List(1,2,3))
-     * foldRight(List(1,2,3), Nil)((a, acc) => Cons(a, acc))
-     * Cons(1, foldRight(List(2,3), Nil)((a, acc) => Cons(a, acc)))
+     * identity(List(1, 2, 3))
+     * foldRight(List(1, 2, 3), Nil)((a, acc) => Cons(a, acc))
+     * Cons(1, foldRight(List(2, 3), Nil)((a, acc) => Cons(a, acc)))
      * Cons(1, Cons(2, foldRight(List(3), Nil)((a, acc) => Cons(a, acc)))
      * Cons(1, Cons(2, Cons(3, foldRight(Nil, Nil)((a, acc) => Cons(a, acc)))
      * Cons(1, Cons(2, Cons(3, Nil)))
@@ -297,4 +313,5 @@ object Chapter2And3 {
     def mapUsingFold[A, B](t: Tree[A])(f: A => B): Tree[B] =
       fold[A, Tree[B]](t, v => Leaf(f(v)))((l, r) => Branch(map(l)(f), map(r)(f)))
   }
+
 }
