@@ -64,6 +64,12 @@ object Chapter5 {
 
     def flatMap[B](f: A => Stream[B]): Stream[B] =
       foldRight[Stream[B]](Empty)((a, b) => f(a) append b)
+
+    def tails: Stream[Stream[A]] =
+      Stream.unfold[Stream[A], Option[Stream[A]]](Some(this))(str => str.map(st => (st, st.uncons.map(_.tail))))
+
+    def scanRight[B](z: B)(f: (A, => B) => B): Stream[B] =
+      tails.map(_.foldRight(z)(f))
   }
 
   object Empty extends Stream[Nothing] {
@@ -113,8 +119,47 @@ object Chapter5 {
 
     val onesUsingUnfold: Stream[Int] = unfold(1)(i => Some(1, 1))
 
+    def constantUsingUnfold[A](a: A): Stream[A] =
+      unfold(a)(_ => Some((a, a)))
+
     def fromUsingUnfold(n: Int): Stream[Int] =
       unfold(n)(i => Some((i, i + 1)))
+
+    def fibsUsingUnfold: Stream[Int] =
+      unfold((0, 1))(pair => Some((pair._1, (pair._2, pair._1 + pair._2))))
+
+    def map[A, B](s: Stream[A])(f: A => B): Stream[B] =
+      unfold(s)(str => str.uncons.map(st => (f(st.head), st.tail)))
+
+    def take[A](s: Stream[A], n: Int): Stream[A] =
+      unfold((s, n))(str =>
+        if (str._2 > 0) str._1.uncons.map(st => (st.head, (st.tail, str._2 - 1)))
+        else None)
+
+    def takeWhile[A](s: Stream[A], p: A => Boolean) = unfold(s)(str =>
+      str.uncons.filter(st => p(st.head)).map(st => (st.head, st.tail)))
+
+    def zip[A, B](s1: Stream[A], s2: Stream[B]): Stream[(A, B)] =
+      unfold((s1, s2))(streams => streams._1.uncons.flatMap(elem1 => streams._2.uncons.map(elem2 => ((elem1.head, elem2.head), (elem1.tail, elem2.tail)))))
+
+    def zipAll[A, B](s1: Stream[A], s2: Stream[B]): Stream[(Option[A], Option[B])] =
+      unfold((s1, s2))(streams => {
+        val first: Option[(A, Stream[A])] = streams._1.uncons.map(str => (str.head, str.tail))
+        val second = streams._2.uncons.map(str => (str.head, str.tail))
+        if (first.isEmpty && second.isEmpty) None
+        else Some(((first.map(_._1), second.map(_._1)), (first.map(_._2).getOrElse(Empty), second.map(_._2).getOrElse(Empty))))
+      })
+
+    def startsWith[A](s1: Stream[A], s2: Stream[A]): Boolean =
+      zipAll(s1, s2)
+        .takeWhile(pair => pair._2.isDefined)
+        .forAll(pair => pair._1.isDefined && pair._1.get == pair._2.get)
+
+    //    def tails[A](s: Stream[A]): Stream[Stream[A]] =
+    //      unfold[Stream[A], Option[Stream[A]]](Some(s))(str => str.map(st => (st, st.uncons.map(_.tail))))
+
+    def hasSubsequence[A](s1: Stream[A], s2: Stream[A]): Boolean =
+      s1.tails exists (startsWith(_, s2))
   }
 
 }

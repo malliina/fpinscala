@@ -242,4 +242,36 @@ class FpisTests extends FunSuite {
   test("Stream.fromUsingUnfold") {
     assert(Stream.fromUsingUnfold(4).take(3).toList === scala.List(4, 5, 6))
   }
+  test("Stream.fibsUsingUnfold") {
+    assert(Stream.fibsUsingUnfold.take(7).toList === scala.List(0, 1, 1, 2, 3, 5, 8))
+  }
+  test("Stream.constantUsingUnfold") {
+    assert(Stream.constantUsingUnfold(6).take(5).toList === scala.List(6, 6, 6, 6, 6))
+  }
+  test("Stream.map") {
+    assert(Stream.map(Stream(1, 2, 3))(_ * 2).toList === scala.List(2, 4, 6))
+  }
+  test("Stream.zipAll") {
+    assert((Some(1), None) ===(Some(1), None))
+    val s1 = Stream(1, 2)
+    val s2 = Stream(3, 4, 5, 6)
+    val actual = Stream.zipAll(s1, s2)
+    val expected = Stream((Some(1), Some(3)), (Some(2), Some(4)), (None, Some(5)), (None, Some(6))).toList
+    assert(actual.toList(1)._2.get === 4)
+    assert(actual.toList(1)._2.get === expected.toList(1)._2.get)
+    assert(actual.toList(2)._1.isEmpty)
+  }
+  test("Stream.startsWith") {
+    assert(Stream.startsWith(Stream(1, 2, 3), Stream(1, 2)))
+    assert(Stream.startsWith(Stream.from(1), Stream(1, 2, 3, 4, 5)))
+    assert(!Stream.startsWith(Stream.from(1), Stream(1, 2, 3, 5)))
+  }
+  test("Stream.tails") {
+    val actual = Stream(1, 2, 3).tails // Stream.tails(Stream(1, 2, 3))
+    val expected = Stream(Stream(1, 2, 3), Stream(2, 3), Stream(3), Stream())
+    assert(actual.map(_.toList).toList === expected.map(_.toList).toList)
+  }
+  test("Stream.scanRight") {
+    assert(Stream(1, 2, 3).scanRight(0)(_ + _).toList === scala.List(6, 5, 3, 0))
+  }
 }
