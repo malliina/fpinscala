@@ -274,4 +274,47 @@ class FpisTests extends FunSuite {
   test("Stream.scanRight") {
     assert(Stream(1, 2, 3).scanRight(0)(_ + _).toList === scala.List(6, 5, 3, 0))
   }
+
+  import Chapter6._
+
+  test("erroneousRollDie has (off-by-one) error") {
+    assert(erroneousRollDie(Simple(5))._1 === 0)
+  }
+  test("positiveLessThan") {
+    //    val numbers = (42 to 42 + 100).map(Simple(_)).map(positiveLessThan(13)).map(_._1)
+    //    println(numbers)
+  }
+  test("rollDie") {
+    val dies = (42 to 42 + 10000).map(Simple(_)).map(rollDie).map(_._1)
+    assert(dies.forall(die => die > 0 && die < 7))
+    (1 to 6).foreach(i => assert(dies.exists(_ == i)))
+  }
+  test("State for comprehension") {
+    val ns: Rand[scala.List[Int]] =
+      int.flatMap(x => int.flatMap(y => ints(x).map(xs => xs.map(_ % y))))
+
+    val ns2: Rand[scala.List[Int]] = for {
+      x <- int
+      y <- int
+      xs <- ints(x)
+    } yield xs.map(_ % y)
+
+    def run(xs: Rand[scala.List[Int]]) = xs.run(Simple(5))._1
+
+    assert(run(ns) === run(ns2))
+  }
+  test("State.sequence") {
+    val (v1, s1) = int.run(Simple(42))
+    val (v2, _) = int.run(s1)
+
+    val (list, _) = State.sequence(scala.List(int, int)).run(Simple(42))
+    assert(list === scala.List(v1, v2))
+  }
+  test("simulateMachine") {
+    val initState: Machine = Machine(locked = true, candies = 5, coins = 10)
+    val moves = simulateMachine(scala.List(Coin, Turn, Coin, Turn, Coin, Turn, Coin, Turn))
+    val ((coins, candies), _) = moves.run(initState)
+    assert(coins === 14)
+    assert(candies === 1)
+  }
 }
