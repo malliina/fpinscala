@@ -1,15 +1,13 @@
-package com.mle.fpis.tests
+package com.mle.fpis
 
 /**
  *
  * @author mle
  */
-object Chapter6 {
-
-  trait RNG {
-    def nextInt: (Int, RNG)
-  }
-
+trait RNG {
+  def nextInt: (Int, RNG)
+}
+object RNG {
   case class Simple(seed: Long) extends RNG {
     def nextInt: (Int, RNG) = {
       val newSeed = (seed * 0x5DEECE66DL + 0xBL) & 0xFFFFFFFFFFFFL
@@ -116,6 +114,10 @@ object Chapter6 {
     rng => seqAcc(fs, rng, Nil)
   }
 
+  // RandF[Stream[A]] = RNG => (Stream[A], RNG)
+  def randomStream[A](g: RandF[A])(rng: RNG): Streams.Stream[A] =
+    Streams.Stream.infiniteUnfold(rng)(g)
+
   def intsUsingSequence(count: Int): RandF[List[Int]] =
     sequence(List.fill(count)(intf))
 
@@ -153,44 +155,6 @@ object Chapter6 {
     }
 
   //  type State[S, +A] = S => (A, S)
-
-  case class State[S, +A](run: S => (A, S)) {
-    def map[B](f: A => B): State[S, B] =
-      State(s => {
-        val (a, s2) = run(s)
-        (f(a), s2)
-      })
-
-    def map2[B, C](other: State[S, B])(f: (A, B) => C): State[S, C] =
-      State(s => {
-        val (a, sa) = run(s)
-        val (b, sb) = other.run(sa)
-        (f(a, b), sb)
-      })
-
-    def flatMap[B](g: A => State[S, B]): State[S, B] =
-      State(s => {
-        val (a, sa) = run(s)
-        val sb = g(a)
-        sb.run(sa)
-      })
-  }
-
-  object State {
-    def unit[A, S](a: A): State[S, A] = State(s => (a, s))
-
-    def sequence[S, A](fs: List[State[S, A]]): State[S, List[A]] = {
-      def seqAcc(rands: List[State[S, A]], state: S, acc: List[A]): (List[A], S) =
-        rands match {
-          case h :: t =>
-            val (v, s) = h.run(state)
-            seqAcc(t, s, acc :+ v)
-          case Nil =>
-            (acc, state)
-        }
-      State(s => seqAcc(fs, s, Nil))
-    }
-  }
 
   sealed trait Input
 

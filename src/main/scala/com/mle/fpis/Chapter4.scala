@@ -1,5 +1,4 @@
-package com.mle.fpis.tests
-
+package com.mle.fpis
 
 /**
  *
@@ -9,36 +8,36 @@ object Chapter4 {
 
   case class Some[+A](get: A) extends Option[A]
 
-  case object None extends Option[Nothing]
+  case object NoneCustom extends Option[Nothing]
 
   // E4.1
   trait Option[+A] {
     def map[B](f: A => B): Option[B] = this match {
-      case None => None
+      case NoneCustom => NoneCustom
       case Some(value) => Some(f(value))
     }
 
     def flatMap[B](f: A => Option[B]): Option[B] = this match {
-      case None => None
+      case NoneCustom => NoneCustom
       case Some(value) => f(value)
     }
 
     def getOrElse[B >: A](default: => B): B = this match {
-      case None => default
+      case NoneCustom => default
       case Some(value) => value
     }
 
     def orElse[B >: A](ob: => Option[B]): Option[B] = this match {
-      case None => ob
+      case NoneCustom => ob
       case other => other
     }
 
     def filter(f: A => Boolean): Option[A] =
-      flatMap(a => if (f(a)) Some(a) else None)
+      flatMap(a => if (f(a)) Some(a) else NoneCustom)
   }
 
   def mean(xs: Seq[Double]): Option[Double] =
-    if (xs.isEmpty) None
+    if (xs.isEmpty) NoneCustom
     else Some(xs.sum / xs.length)
 
   // E4.2

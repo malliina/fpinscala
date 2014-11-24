@@ -1,10 +1,10 @@
-package com.mle.fpis.tests
+package com.mle.fpis
 
 /**
  *
  * @author mle
  */
-object Chapter5 {
+object Streams {
 
   sealed abstract class Stream[+A] {
     def uncons: Option[Cons[A]]
@@ -28,6 +28,9 @@ object Chapter5 {
 
     def exists(p: A => Boolean): Boolean =
       foldRight(false)((a, b) => p(a) || b)
+
+    def find(p: A => Boolean): Option[A] =
+      uncons.map(ca => if (p(ca.head)) Some(ca.head) else ca.tail.find(p)) getOrElse None
 
     /**
      * Stream(1, 2, 3).forall(a => a < 4)
@@ -117,6 +120,11 @@ object Chapter5 {
     def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
       f(z).map(p => cons(p._1, unfold(p._2)(f))).getOrElse(Empty)
 
+    def infiniteUnfold[A, S](z: S)(f: S => (A, S)): Stream[A] = {
+      val (a, s) = f(z)
+      cons(a, infiniteUnfold(s)(f))
+    }
+
     val onesUsingUnfold: Stream[Int] = unfold(1)(i => Some(1, 1))
 
     def constantUsingUnfold[A](a: A): Stream[A] =
@@ -140,7 +148,11 @@ object Chapter5 {
       str.uncons.filter(st => p(st.head)).map(st => (st.head, st.tail)))
 
     def zip[A, B](s1: Stream[A], s2: Stream[B]): Stream[(A, B)] =
-      unfold((s1, s2))(streams => streams._1.uncons.flatMap(elem1 => streams._2.uncons.map(elem2 => ((elem1.head, elem2.head), (elem1.tail, elem2.tail)))))
+      unfold((s1, s2))(streams => {
+        streams._1.uncons.flatMap(elem1 => streams._2.uncons.map(elem2 => {
+          ((elem1.head, elem2.head), (elem1.tail, elem2.tail))
+        }))
+      })
 
     def zipAll[A, B](s1: Stream[A], s2: Stream[B]): Stream[(Option[A], Option[B])] =
       unfold((s1, s2))(streams => {

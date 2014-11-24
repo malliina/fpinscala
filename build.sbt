@@ -1,9 +1,9 @@
 name := "fpis"
 
-scalaVersion := "2.10.3"
+scalaVersion := "2.11.4"
 
 fork in Test := true
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "1.9.2" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.2" % "test"
 
 incOptions := incOptions.value.withNameHashing(true)

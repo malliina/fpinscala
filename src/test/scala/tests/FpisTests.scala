@@ -1,7 +1,10 @@
-package com.mle.fpis.tests
+package tests
 
+import com.mle.fpis.Chapter2And3._
+import com.mle.fpis.Trees.{Branch, Leaf, Tree}
+import com.mle.fpis._
 import org.scalatest.FunSuite
-import Chapter2And3._
+
 
 /**
  *
@@ -37,7 +40,7 @@ class FpisTests extends FunSuite {
     assert(addThree(666) === 669)
   }
 
-  import Chapter2And3.List
+  import com.mle.fpis.Chapter2And3.List
 
   test("list") {
     assert(List.xValue === 3)
@@ -78,6 +81,7 @@ class FpisTests extends FunSuite {
     val l = List[Double](1, 2, 3, 4)
     assert(List.productLeft(l) === 24)
   }
+
   test("lengthLeft") {
     assert(List.lengthLeft(List(666, 2, 3, 4)) === 4)
   }
@@ -149,6 +153,7 @@ class FpisTests extends FunSuite {
     assert(!List.hasSubsequence(l, List(5)))
     assert(!List.hasSubsequence(Nil, List(1, 2, 3)))
   }
+
   val t = Branch[Int](Branch[Int](Branch[Int](Leaf(1), Leaf(4)), Branch[Int](Leaf(2), Leaf(3))), Branch(Leaf(2), Leaf(5)))
   val tDouble = Branch[Int](Branch[Int](Branch[Int](Leaf(2), Leaf(8)), Branch[Int](Leaf(4), Leaf(6))), Branch(Leaf(4), Leaf(10)))
 
@@ -158,7 +163,6 @@ class FpisTests extends FunSuite {
    * b     b     2 5
    * 1 4   2 3
    */
-
 
   test("Tree.size") {
     assert(Tree.size(t) === 11)
@@ -187,22 +191,22 @@ class FpisTests extends FunSuite {
     assert(Tree.mapUsingFold(t)(_ * 2) === tDouble)
   }
 
-  import Chapter4._
+  import com.mle.fpis.Chapter4._
 
   test("sequence[A](List[Option[A]])") {
-    val in1 = scala.List(Some(1), Some(2), None, Some(3))
-    assert(Chapter4.sequence(in1) === None)
+    val in1 = scala.List(Some(1), Some(2), NoneCustom, Some(3))
+    assert(Chapter4.sequence(in1) === NoneCustom)
     val in2 = scala.List(Some("a"), Some("b"))
     assert(Chapter4.sequence(in2) === Some(scala.List("a", "b")))
   }
   test("sequenceInTermsOfTraverse") {
-    val in1 = scala.List(Some(1), Some(2), None, Some(3))
-    assert(Chapter4.sequenceInTermsOfTraverse(in1) === None)
+    val in1 = scala.List(Some(1), Some(2), NoneCustom, Some(3))
+    assert(Chapter4.sequenceInTermsOfTraverse(in1) === NoneCustom)
     val in2 = scala.List(Some("a"), Some("b"))
     assert(Chapter4.sequenceInTermsOfTraverse(in2) === Some(scala.List("a", "b")))
   }
 
-  import Chapter5._
+  import com.mle.fpis.Streams._
 
   test("streams") {
     assert(Stream(1, 2, 3, 4, 5).take(2).toList === scala.List(1, 2))
@@ -252,11 +256,11 @@ class FpisTests extends FunSuite {
     assert(Stream.map(Stream(1, 2, 3))(_ * 2).toList === scala.List(2, 4, 6))
   }
   test("Stream.zipAll") {
-    assert((Some(1), None) ===(Some(1), None))
+    assert((Some(1), NoneCustom) ===(Some(1), NoneCustom))
     val s1 = Stream(1, 2)
     val s2 = Stream(3, 4, 5, 6)
     val actual = Stream.zipAll(s1, s2)
-    val expected = Stream((Some(1), Some(3)), (Some(2), Some(4)), (None, Some(5)), (None, Some(6))).toList
+    val expected = Stream((Some(1), Some(3)), (Some(2), Some(4)), (NoneCustom, Some(5)), (NoneCustom, Some(6))).toList
     assert(actual.toList(1)._2.get === 4)
     assert(actual.toList(1)._2.get === expected.toList(1)._2.get)
     assert(actual.toList(2)._1.isEmpty)
@@ -275,7 +279,7 @@ class FpisTests extends FunSuite {
     assert(Stream(1, 2, 3).scanRight(0)(_ + _).toList === scala.List(6, 5, 3, 0))
   }
 
-  import Chapter6._
+  import com.mle.fpis.RNG._
 
   test("erroneousRollDie has (off-by-one) error") {
     assert(erroneousRollDie(Simple(5))._1 === 0)
@@ -287,7 +291,7 @@ class FpisTests extends FunSuite {
   test("rollDie") {
     val dies = (42 to 42 + 10000).map(Simple(_)).map(rollDie).map(_._1)
     assert(dies.forall(die => die > 0 && die < 7))
-    (1 to 6).foreach(i => assert(dies.exists(_ == i)))
+    (1 to 6).foreach(i => assert(dies contains i))
   }
   test("State for comprehension") {
     val ns: Rand[scala.List[Int]] =
@@ -316,5 +320,32 @@ class FpisTests extends FunSuite {
     val ((coins, candies), _) = moves.run(initState)
     assert(coins === 14)
     assert(candies === 1)
+  }
+  test("boolean generators") {
+    val initRNG = Simple(seed = 12345)
+    val g = Gen.boolean
+    val (b, _) = g.sample.run(initRNG)
+    assert(!b)
+  }
+  test("Gen.choose") {
+    val (min, max) = (-10, 10)
+    val initRNG = Simple(seed = 12345)
+    val g = Gen.choose(min, max)
+    val (i, _) = g.sample.run(initRNG)
+    assert(i >= min && i <= max)
+  }
+  test("Gen.listOfN") {
+    val (min, max) = (-10, 10)
+    val initRNG = Simple(seed = 12345)
+    val g = Gen.choose(min, max)
+    val (list, _) = Gen.listOfN(1000, g).sample.run(initRNG)
+    //    val occurrences = list.groupBy(i => i).map(pair => (pair._1, pair._2.size)).toSeq.sortBy(_._1)
+    assert(list.forall(i => i >= min && i <= max))
+  }
+
+  test("Prop.run") {
+    Prop.run(Props.maxProp)
+    Prop.run(Props.sortProp)
+    Prop.run(Props.forkProperty)
   }
 }
